@@ -1,0 +1,128 @@
+generator client {
+    provider = "prisma-client"
+    output   = "../src/generated"
+}
+
+datasource db {
+    provider = "postgresql"
+}
+
+//Enum for user roles
+enum UserRole {
+    FARMER
+    BUYER
+    STORAGE_OWNER
+    ADMIN
+}
+
+//Enum for user status
+enum UserStatus {
+    ACTIVE
+    INACTIVE
+}
+
+//Enum for product status
+enum ProductStatus {
+    AVAILABLE
+    OUT_OF_STOCK
+    INACTIVE
+}
+
+//Enum for booking status
+enum BookingStatus {
+    PENDING
+    CONFIRMED
+    CANCELLED
+    COMPLETED
+}
+
+//User model
+model User {
+    id Int @id @default(autoincrement())
+    name String
+    email String @unique
+    password String
+    role UserRole @default(FARMER)
+    status UserStatus @default(ACTIVE)
+    isDeleted Boolean @default(false)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    products Product[]
+    reviews Review[]
+    bookings Booking[]
+}
+
+//Category model
+model Category {
+    id Int @id @default(autoincrement())
+    name String @unique
+    description String?
+    isDeleted Boolean @default(false)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    products Product[]
+}
+
+//Product model
+model Product {
+    id Int @id @default(autoincrement())
+    name String
+    description String?
+    price Decimal
+    quantity Int
+    categoryId Int
+    userId Int
+    status ProductStatus @default(AVAILABLE)
+    isDeleted Boolean @default(false)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    category Category @relation(fields: [categoryId], references: [id])
+    user User @relation(fields: [userId], references: [id])
+
+    reviews Review[]
+    bookings Booking[]
+
+    @@index([categoryId])
+    @@index([userId])
+}
+
+//Review model
+model Review {
+    id Int @id @default(autoincrement())
+    rating Int
+    comment String?
+    userId Int
+    productId Int
+    isDeleted Boolean @default(false)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    user User @relation(fields: [userId], references: [id])
+    product Product @relation(fields: [productId], references: [id])
+
+
+    @@index([productId])
+    @@index([userId])
+}
+
+//Bookings model
+model Booking {
+    id Int @id @default(autoincrement())
+    quantity Int
+    status BookingStatus @default(PENDING)
+    userId Int
+    productId Int
+    isDeleted Boolean @default(false)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    user User @relation(fields: [userId], references: [id])
+    product Product @relation(fields: [productId], references: [id])
+
+    @@index([productId])
+    @@index([userId])
+    @@index([status])
+}
