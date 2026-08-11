@@ -10,6 +10,17 @@ export const createProduct = async (data: {
 }) => {
   return prisma.product.create({
     data,
+    include: {
+      category: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+        },
+      },
+    },
   });
 };
 
@@ -18,10 +29,58 @@ export const getProducts = async () => {
     where: {
       isDeleted: false,
     },
+    include: {
+      category: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+        },
+      },
+    },
     orderBy: {
       createdAt: "desc",
     },
   });
+};
+
+export const getProductById = async (id: number) => {
+  const product = await prisma.product.findFirst({
+    where: {
+      id,
+      isDeleted: false,
+    },
+    include: {
+      category: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+        },
+      },
+      reviews: {
+        where: { isDeleted: false },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!product) {
+    throw new Error("Product not found");
+  }
+
+  return product;
 };
 
 export const updateProduct = async (
@@ -31,15 +90,44 @@ export const updateProduct = async (
     description?: string;
     price?: number;
     quantity?: number;
+    categoryId?: number;
+    status?: any;
   },
 ) => {
+  const existingProduct = await prisma.product.findFirst({
+    where: { id, isDeleted: false },
+  });
+
+  if (!existingProduct) {
+    throw new Error("Product not found");
+  }
+
   return prisma.product.update({
     where: { id },
     data,
+    include: {
+      category: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+        },
+      },
+    },
   });
 };
 
 export const deleteProduct = async (id: number) => {
+  const existingProduct = await prisma.product.findFirst({
+    where: { id, isDeleted: false },
+  });
+
+  if (!existingProduct) {
+    throw new Error("Product not found");
+  }
+
   return prisma.product.update({
     where: { id },
     data: {

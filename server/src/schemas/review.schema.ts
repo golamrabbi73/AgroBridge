@@ -6,3 +6,8 @@ export const reviewSchema = z.object({
   userId: z.number().int().positive(),
   productId: z.number().int().positive(),
 });
+
+export const updateReviewSchema = z.object({
+  rating: z.number().int().min(1).max(5).optional(),
+  comment: z.string().optional(),
+});

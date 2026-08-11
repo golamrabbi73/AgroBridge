@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
-import { loginUser, registerUser } from "../services/auth.service.js";
+import { getUserProfile, loginUser, registerUser } from "../services/auth.service.js";
+import { AuthRequest } from "../middlewares/auth.middleware.js";
 
 export const register = async (req: Request, res: Response) => {
   try {
@@ -31,6 +32,31 @@ export const login = async (req: Request, res: Response) => {
     res.status(401).json({
       success: false,
       message: error instanceof Error ? error.message : "Login failed",
+    });
+  }
+};
+
+export const getMe = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    const user = await getUserProfile(userId);
+
+    res.json({
+      success: true,
+      message: "User profile retrieved successfully",
+      data: user,
+    });
+  } catch (error) {
+    res.status(404).json({
+      success: false,
+      message: error instanceof Error ? error.message : "Profile not found",
     });
   }
 };

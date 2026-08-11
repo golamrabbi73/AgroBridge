@@ -51,6 +51,8 @@ model User {
     products Product[]
     reviews Review[]
     bookings Booking[]
+
+    @@map("users")
 }
 
 //Category model
@@ -63,6 +65,8 @@ model Category {
     updatedAt DateTime @updatedAt
 
     products Product[]
+
+    @@map("categories")
 }
 
 //Product model
@@ -87,6 +91,7 @@ model Product {
 
     @@index([categoryId])
     @@index([userId])
+    @@map("products")
 }
 
 //Review model
@@ -103,9 +108,9 @@ model Review {
     user User @relation(fields: [userId], references: [id])
     product Product @relation(fields: [productId], references: [id])
 
-
     @@index([productId])
     @@index([userId])
+    @@map("reviews")
 }
 
 //Bookings model
@@ -125,4 +130,5 @@ model Booking {
     @@index([productId])
     @@index([userId])
     @@index([status])
+    @@map("bookings")
 }
